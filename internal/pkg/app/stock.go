@@ -9,14 +9,27 @@ import (
 	"strings"
 )
 
+// HTTPClient interface used to mock http request to test
+type HTTPClient interface {
+	// Do ...
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // StockApp ...
 type StockApp struct {
 	stockURL string
+	client   HTTPClient
 }
 
 // NewStockApp creates new implementation of Stock service
-func NewStockApp(stockURL string) *StockApp {
-	return &StockApp{stockURL: stockURL}
+func NewStockApp(
+	stockURL string,
+	client HTTPClient,
+) *StockApp {
+	return &StockApp{
+		stockURL: stockURL,
+		client:   client,
+	}
 }
 
 // HandleStockRequest ...
@@ -28,7 +41,9 @@ func (s *StockApp) getStockPrice(key string) string {
 	stockServiceURL := fmt.Sprintf(s.stockURL, url.QueryEscape(key))
 	log.Println("processing", stockServiceURL)
 
-	response, err := http.Get(stockServiceURL)
+	request, err := http.NewRequest(http.MethodGet, stockServiceURL, nil)
+
+	response, err := s.client.Do(request)
 	if err != nil {
 		log.Println("error :", err)
 		return "stock service unreachable"
@@ -44,7 +59,7 @@ func (s *StockApp) getStockPrice(key string) string {
 		price := content[1][6]
 		log.Println("content:", content)
 		if price == "N/D" {
-			return fmt.Sprintf("%s quote is not available", strings.ToUpper(symbol))
+			return fmt.Sprintf("%s quote is not available", key)
 		}
 		return fmt.Sprintf("%s quote is $%s per share", strings.ToUpper(symbol), price)
 	}

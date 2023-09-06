@@ -5,6 +5,7 @@ import (
 	"github.com/brcodingdev/stock-service/internal/pkg/app"
 	"github.com/brcodingdev/stock-service/internal/pkg/broker"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -43,7 +44,7 @@ func main() {
 		log.Panicln("required RECEIVER_QUEUE, PUBLISHER_QUEUE, STOCK_SERVICE_URL env vars set")
 	}
 
-	handlerStockApp := app.NewStockApp(stockServiceUrl)
+	handlerStockApp := app.NewStockApp(stockServiceUrl, &http.Client{})
 	rabbit, err := broker.NewRabbitMQ(
 		dsn,
 		receiverQueue,
