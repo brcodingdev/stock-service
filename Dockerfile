@@ -16,6 +16,8 @@ RUN apk update \
 
 WORKDIR /app
 COPY .env /app/.env
+
+ENV RABBIT_HOST=host.docker.internal
 COPY --from=builder /go/src/github.com/brcodingdev/stock-service/stockservice .
 
 CMD ["./stockservice"]
