@@ -14,6 +14,14 @@ build:
 	@echo "Building"
 	@go build -o chatservice ./cmd
 
+build-docker:
+	@echo "Building docker image"
+	@docker build -t stock-service:latest .
+
 run:
 	@echo "Starting stock service"
 	@go run ./cmd
+
+run-docker: build-docker
+	@echo "Starting stock service with docker"
+	@docker run stock-service:latest
